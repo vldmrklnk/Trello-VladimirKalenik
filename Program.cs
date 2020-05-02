@@ -47,14 +47,14 @@ namespace Trello
 								Console.WriteLine("Введите название карточки: ");
 								string title = Console.ReadLine();
 								Console.WriteLine("Введите имя исполнителя: ");
-								User user = FindOrCreateUser(Console.ReadLine(), userManager);
+								User user = userManager.FindOrCreateUser(Console.ReadLine(), userManager);
 								Console.WriteLine("Введите информацию: ");
 								string data = Console.ReadLine();
 								try
 								{
 									Console.WriteLine("Для какой доски добавить карточку");
 									cardManager.CreateNewCard(title, data, user,
-																ChooseDesk(Console.ReadLine(), deskManager));
+																deskManager.ChooseDesk(Console.ReadLine(), deskManager));
 								}
 								catch
 								{
@@ -62,13 +62,12 @@ namespace Trello
 								}
 								break;
 							}
-
 						case 3:
 							{
 								try
 								{
 									Console.WriteLine("Введите название карточки, которую хотите изменить: ");
-									Card card = ChooseCard(Console.ReadLine(), cardManager);
+									Card card = cardManager.ChooseCard(Console.ReadLine(), cardManager);
 									Console.WriteLine("Измените текст");
 									card.Data = Console.ReadLine();
 
@@ -84,7 +83,7 @@ namespace Trello
 								try
 								{
 									Console.WriteLine("Введите название карточки статус которой, хотите изменить: ");
-									Card card = ChooseCard(Console.ReadLine(), cardManager);
+									Card card = cardManager.ChooseCard(Console.ReadLine(), cardManager);
 									Console.WriteLine("Выберите статус: \n" +
 														"0-ToDO\n" +
 														"1-OnTeacher\n" +
@@ -103,9 +102,9 @@ namespace Trello
 								try
 								{
 									Console.WriteLine("Введите название карточки исполнителя которой, хотите изменить: ");
-									Card card = ChooseCard(Console.ReadLine(), cardManager);
+									Card card = cardManager.ChooseCard(Console.ReadLine(), cardManager);
 									Console.WriteLine("Введите имя нового исполнителя: ");
-									User user = FindOrCreateUser(Console.ReadLine(), userManager);
+									User user = userManager.FindOrCreateUser(Console.ReadLine(), userManager);
 									card.ChangeExecuter(user);
 								}
 								catch
@@ -117,7 +116,7 @@ namespace Trello
 						case 6:
 							{
 								Console.WriteLine("Введите имя исполнителя, чтобы вывести его карточки");
-								User user = FindOrCreateUser(Console.ReadLine(), userManager);
+								User user = userManager.FindOrCreateUser(Console.ReadLine(), userManager);
 								Console.WriteLine("|     Title     |     Executer     |     Data     |     Status     |     Desk     |");
 								foreach (var c in cardManager.cards)
 								{
@@ -171,7 +170,6 @@ namespace Trello
 					this.Name = name;
 					this.DeadLine = date;
 				}
-
 			}
 			public class DeskManager
 			{
@@ -187,15 +185,24 @@ namespace Trello
 				public void ShowAllCardsOfTheDesk(Desk desk, CardManager cardManager)
 				{
 					Console.WriteLine("|     Title     |     Executer     |     Data     |     Status     |     Desk     |");
-					foreach (var c in cardManager.cards)
+					foreach (var c in cardManager.cards.Where(t => t.ContainerDesk == desk))
 					{
-						if (c.ContainerDesk == desk)
-							Console.WriteLine($"|     {c.Title}     |     {c.Executer.Name}     |     {c.Data}     |     {c.status}     |" +
-								$"     {c.ContainerDesk.Name}     |");
+						Console.WriteLine($"|     {c.Title}     |     {c.Executer.Name}     |     {c.Data}     |     {c.status}     |" +
+							$"     {c.ContainerDesk.Name}     |");
 
 					}
-
-
+				}
+				public Desk ChooseDesk(string name, DeskManager deskManager)
+				{
+					int i;
+					for (i = 0; i < deskManager.desks.Count; i++)
+					{
+						if (deskManager.desks[i].Name == name)
+						{
+							break;
+						}
+					}
+					return deskManager.desks[i];
 				}
 			}
 			public class Card
@@ -252,6 +259,16 @@ namespace Trello
 								$"     {c.ContainerDesk.Name}     |");
 					}
 				}
+				public Card ChooseCard(string name, CardManager cardManager)
+				{
+					int i;
+					for (i = 0; i < cardManager.cards.Count; i++)
+						if (cardManager.cards[i].Title == name)
+						{
+							break;
+						}
+					return cardManager.cards[i];
+				}
 			}
 			public class User
 			{
@@ -275,8 +292,29 @@ namespace Trello
 					users.Remove(user);
 					Console.WriteLine($"Пользователь {user.Name} удалён");
 				}
+				public User FindOrCreateUser(string name, UserManager userManager)
+				{
+					int i;
+					if (userManager.users.Count == 0)
+					{
+						userManager.CreateNewUser(name);
+						i = 0;
+					}
+					else
+					{
+						for (i = 0; i < userManager.users.Count; i++)
+							if (userManager.users[i].Name == name)
+							{
+								break;
+							}
+							else
+							{
+								userManager.CreateNewUser(name);
+							}
+					}
+					return userManager.users[i];
+				}
 			}
-
 			public enum StatusOfCard
 			{
 				ToDo,
@@ -287,51 +325,6 @@ namespace Trello
 			static void Main(string[] args)
 			{
 				Menu menu = new Menu();
-			}
-			public static Desk ChooseDesk(string name, DeskManager deskManager)
-			{
-				int i;
-				for (i = 0; i < deskManager.desks.Count; i++)
-				{
-					if (deskManager.desks[i].Name == name)
-					{
-						break;
-					}
-				}
-
-				return deskManager.desks[i];
-			}
-			public static Card ChooseCard(string name, CardManager cardManager)
-			{
-				int i;
-				for (i = 0; i < cardManager.cards.Count; i++)
-					if (cardManager.cards[i].Title == name)
-					{
-						break;
-					}
-				return cardManager.cards[i];
-			}
-			public static User FindOrCreateUser(string name, UserManager userManager)
-			{
-				int i;
-				if (userManager.users.Count == 0)
-				{
-					userManager.CreateNewUser(name);
-					i = 0;
-				}
-				else
-				{
-					for (i = 0; i < userManager.users.Count; i++)
-						if (userManager.users[i].Name == name)
-						{
-							break;
-						}
-						else
-						{
-							userManager.CreateNewUser(name);
-						}
-				}
-				return userManager.users[i];
 			}
 		}
 	}
