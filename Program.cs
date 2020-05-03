@@ -10,11 +10,12 @@ namespace Trello
 	{
 		public class Menu
 		{
-			public Menu()
+		public Menu()
 			{
 				DeskManager deskManager = new DeskManager();
 				UserManager userManager = new UserManager();
 				CardManager cardManager = new CardManager();
+				
 
 				while (true)
 				{
@@ -84,6 +85,7 @@ namespace Trello
 								{
 									Console.WriteLine("Введите название карточки статус которой, хотите изменить: ");
 									Card card = cardManager.ChooseCard(Console.ReadLine(), cardManager);
+									cardManager.NewChanges+=card.Executer.MessageAboutChanges;
 									Console.WriteLine("Выберите статус: \n" +
 														"0-ToDO\n" +
 														"1-OnTeacher\n" +
@@ -230,6 +232,8 @@ namespace Trello
 			public class CardManager
 			{
 				public List<Card> cards = new List<Card>();
+				public delegate void Changes();
+				public event Changes NewChanges; 
 
 				public void DeleteCard(Card card)
 				{
@@ -248,6 +252,7 @@ namespace Trello
 				{
 					card.status = status;
 					Console.WriteLine("Статус изменён");
+					NewChanges();
 				}
 				public void OverdueDeadLine()
 				{
@@ -276,6 +281,10 @@ namespace Trello
 				public User(string name)
 				{
 					this.Name = name;
+				}
+				public void MessageAboutChanges()
+				{
+					Console.WriteLine($"{this.Name} получил уведомление об измененнии статуса");
 				}
 			}
 			public class UserManager
