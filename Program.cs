@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,14 +10,20 @@ namespace Trello
 {
 	class Program
 	{
+
 		public class Menu
 		{
-		public Menu()
+			public Menu()
 			{
 				DeskManager deskManager = new DeskManager();
 				UserManager userManager = new UserManager();
 				CardManager cardManager = new CardManager();
-				
+				JsonSerializer json1 = new JsonSerializer();
+				using (StreamReader sr = new StreamReader("DeskManager.json"))
+				{
+					deskManager.desks.Add(json1.Deserialize(sr));
+				};
+
 
 				while (true)
 				{
@@ -35,11 +43,16 @@ namespace Trello
 					{
 						case 1:
 							{
+								JsonSerializer json = new JsonSerializer();
 								Console.WriteLine("Введите название доски: ");
 								string ttl = Console.ReadLine();
 								Console.WriteLine("Введите срок дедлайна(год, месяц, день): ");
 								DateTime deadLine = Convert.ToDateTime(Console.ReadLine());
 								Desk desk = new Desk(ttl, deadLine);
+								using (StreamWriter sw = new StreamWriter("DeskManager.json", true))
+								{
+									json.Serialize(sw, desk);
+								}
 								deskManager.AddNewDesk(desk);
 								break;
 							}
@@ -85,7 +98,7 @@ namespace Trello
 								{
 									Console.WriteLine("Введите название карточки статус которой, хотите изменить: ");
 									Card card = cardManager.ChooseCard(Console.ReadLine(), cardManager);
-									cardManager.NewChanges+=card.Executer.MessageAboutChanges;
+									cardManager.NewChanges += card.Executer.MessageAboutChanges;
 									Console.WriteLine("Выберите статус: \n" +
 														"0-ToDO\n" +
 														"1-OnTeacher\n" +
@@ -161,175 +174,6 @@ namespace Trello
 							}
 					}
 				}
-			}
-			public class Desk
-			{
-				public string Name { get; set; }
-				public DateTime DeadLine { get; set; }
-
-				public Desk(string name, DateTime date)
-				{
-					this.Name = name;
-					this.DeadLine = date;
-				}
-			}
-			public class DeskManager
-			{
-				public List<Desk> desks = new List<Desk>();
-				public void AddNewDesk(Desk desk)
-				{
-					desks.Add(desk);
-				}
-				public void DeleteDesk(Desk desk)
-				{
-					desks.Remove(desk);
-				}
-				public void ShowAllCardsOfTheDesk(Desk desk, CardManager cardManager)
-				{
-					Console.WriteLine("|     Title     |     Executer     |     Data     |     Status     |     Desk     |");
-					foreach (var c in cardManager.cards.Where(t => t.ContainerDesk == desk))
-					{
-						Console.WriteLine($"|     {c.Title}     |     {c.Executer.Name}     |     {c.Data}     |     {c.status}     |" +
-							$"     {c.ContainerDesk.Name}     |");
-
-					}
-				}
-				public Desk ChooseDesk(string name, DeskManager deskManager)
-				{
-					int i;
-					for (i = 0; i < deskManager.desks.Count; i++)
-					{
-						if (deskManager.desks[i].Name == name)
-						{
-							break;
-						}
-					}
-					return deskManager.desks[i];
-				}
-			}
-			public class Card
-			{
-				public Desk ContainerDesk { get; set; }
-				public string Title { get; set; }
-				public string Data { get; set; }
-				public User Executer { get; set; }
-				public DateTime dateTime { get; set; }
-				public StatusOfCard status { get; set; }
-				public Card(string title, string data, User user, Desk desk)
-				{
-					this.Title = title;
-					this.Data = data;
-					this.Executer = user;
-					this.dateTime = DateTime.Now;
-					this.ContainerDesk = desk;
-				}
-				public void ChangeExecuter(User user)
-				{
-					this.Executer = user;
-					Console.WriteLine($"Исполнитель изменён на {user.Name}");
-				}
-			}
-			public class CardManager
-			{
-				public List<Card> cards = new List<Card>();
-				public delegate void Changes();
-				public event Changes NewChanges; 
-
-				public void DeleteCard(Card card)
-				{
-					cards.Remove(card);
-					Console.WriteLine($"Карточка {card.Title} удалена");
-				}
-				public Card CreateNewCard(string title, string data, User executer, Desk desk)
-				{
-					Card card = new Card(title, data, executer, desk);
-					card.status = StatusOfCard.ToDo;
-					cards.Add(card);
-					Console.WriteLine($"Карточка {card.Title} создана и прикреплена к доске");
-					return card;
-				}
-				public void ChangeStatus(Card card, StatusOfCard status)
-				{
-					card.status = status;
-					Console.WriteLine("Статус изменён");
-					NewChanges();
-				}
-				public void OverdueDeadLine()
-				{
-					var deadCards = cards.Where(t => t.ContainerDesk.DeadLine < t.dateTime);
-					Console.WriteLine("|     Title     |     Executer     |     Data     |     Status     |     Desk     |");
-					foreach (var c in deadCards)
-					{
-						Console.WriteLine($"|     {c.Title}     |     {c.Executer.Name}     |     {c.Data}     |     {c.status}     |" +
-								$"     {c.ContainerDesk.Name}     |");
-					}
-				}
-				public Card ChooseCard(string name, CardManager cardManager)
-				{
-					int i;
-					for (i = 0; i < cardManager.cards.Count; i++)
-						if (cardManager.cards[i].Title == name)
-						{
-							break;
-						}
-					return cardManager.cards[i];
-				}
-			}
-			public class User
-			{
-				public string Name { get; set; }
-				public User(string name)
-				{
-					this.Name = name;
-				}
-				public void MessageAboutChanges()
-				{
-					Console.WriteLine($"{this.Name} получил уведомление об измененнии статуса");
-				}
-			}
-			public class UserManager
-			{
-				public List<User> users = new List<User>();
-				public User CreateNewUser(string name)
-				{
-					var user = new User(name);
-					users.Add(user);
-					return user;
-				}
-				public void DeleteUser(User user)
-				{
-					users.Remove(user);
-					Console.WriteLine($"Пользователь {user.Name} удалён");
-				}
-				public User FindOrCreateUser(string name, UserManager userManager)
-				{
-					int i;
-					if (userManager.users.Count == 0)
-					{
-						userManager.CreateNewUser(name);
-						i = 0;
-					}
-					else
-					{
-						for (i = 0; i < userManager.users.Count; i++)
-							if (userManager.users[i].Name == name)
-							{
-								break;
-							}
-							else
-							{
-								userManager.CreateNewUser(name);
-							}
-					}
-					return userManager.users[i];
-				}
-			}
-			public enum StatusOfCard
-			{
-				ToDo,
-				OnTeacher,
-				OnStudent,
-				Done
 			}
 			static void Main(string[] args)
 			{
