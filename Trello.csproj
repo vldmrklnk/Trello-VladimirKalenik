@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Card.cs" />
     <Compile Include="CardManager.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="UserManager.cs" />
     <Compile Include="User.cs" />
     <Compile Include="DeskManager.cs" />
