@@ -17,6 +17,7 @@ namespace Trello
 			var user = new User(name);
 			users.Add(user);
 			File.WriteAllText("UserManager.json", JsonConvert.SerializeObject(users));
+			Logger.WriteActionAsync($"Создан пользователь {user.Name}. Время: \n");
 			return user;
 		}
 		public void DeleteUser(User user)

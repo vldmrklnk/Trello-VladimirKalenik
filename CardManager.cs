@@ -26,6 +26,7 @@ namespace Trello
 			cards.Add(card);
 			File.WriteAllText("CardManager.json", JsonConvert.SerializeObject(cards));
 			Console.WriteLine($"Карточка {card.Title} создана и прикреплена к доске");
+			Logger.WriteActionAsync($"Создана карточка {card.Title}. Время: \n");
 			return card;
 		}
 		public void ChangeStatus(Card card, StatusOfCard status)
