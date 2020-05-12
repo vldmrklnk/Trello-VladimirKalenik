@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +24,7 @@ namespace Trello
 			Card card = new Card(title, data, executer, desk);
 			card.status = StatusOfCard.ToDo;
 			cards.Add(card);
+			File.WriteAllText("CardManager.json", JsonConvert.SerializeObject(cards));
 			Console.WriteLine($"Карточка {card.Title} создана и прикреплена к доске");
 			return card;
 		}

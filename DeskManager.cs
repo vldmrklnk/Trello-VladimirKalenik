@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +13,7 @@ namespace Trello
 public void AddNewDesk(Desk desk)
 		{
 			desks.Add(desk);
+			File.WriteAllText("DeskManager.json", JsonConvert.SerializeObject(desks));
 		}
 		public void DeleteDesk(Desk desk)
 		{

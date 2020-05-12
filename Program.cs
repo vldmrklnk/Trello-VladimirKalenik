@@ -18,12 +18,18 @@ namespace Trello
 				DeskManager deskManager = new DeskManager();
 				UserManager userManager = new UserManager();
 				CardManager cardManager = new CardManager();
-				JsonSerializer json1 = new JsonSerializer();
-				using (StreamReader sr = new StreamReader("DeskManager.json"))
+				if (File.Exists("DeskManager.json"))
 				{
-					deskManager.desks.Add(json1.Deserialize(sr));
-				};
-
+					deskManager.desks = JsonConvert.DeserializeObject<List<Desk>>(File.ReadAllText("DeskManager.json"));
+				}
+				if (File.Exists("CardManager.json"))
+				{
+					cardManager.cards = JsonConvert.DeserializeObject<List<Card>>(File.ReadAllText("CardManager.json"));
+				}
+				if (File.Exists("UserManager.json"))
+				{
+					userManager.users = JsonConvert.DeserializeObject<List<User>>(File.ReadAllText("UserManager.json"));
+				}
 
 				while (true)
 				{
@@ -43,16 +49,11 @@ namespace Trello
 					{
 						case 1:
 							{
-								JsonSerializer json = new JsonSerializer();
 								Console.WriteLine("Введите название доски: ");
 								string ttl = Console.ReadLine();
 								Console.WriteLine("Введите срок дедлайна(год, месяц, день): ");
 								DateTime deadLine = Convert.ToDateTime(Console.ReadLine());
 								Desk desk = new Desk(ttl, deadLine);
-								using (StreamWriter sw = new StreamWriter("DeskManager.json", true))
-								{
-									json.Serialize(sw, desk);
-								}
 								deskManager.AddNewDesk(desk);
 								break;
 							}

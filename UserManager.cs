@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace Trello
 		{
 			var user = new User(name);
 			users.Add(user);
+			File.WriteAllText("UserManager.json", JsonConvert.SerializeObject(users));
 			return user;
 		}
 		public void DeleteUser(User user)
