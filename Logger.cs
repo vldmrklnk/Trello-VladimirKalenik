@@ -10,7 +10,7 @@ namespace Trello
 {
 	public class Logger
 	{
-		public static async void WriteActionAsync(string action)
+		public async void WriteActionAsync(string action)
 		{
 			action += DateTime.Now;
 			await Task.Run(() => File.AppendAllText("logs.txt", action));

@@ -13,6 +13,7 @@ namespace Trello
 		public List<Card> cards = new List<Card>();
 		public delegate void Changes();
 		public event Changes NewChanges;
+		private Logger logger = new Logger();
 
 		public void DeleteCard(Card card)
 		{
@@ -26,7 +27,7 @@ namespace Trello
 			cards.Add(card);
 			File.WriteAllText("CardManager.json", JsonConvert.SerializeObject(cards));
 			Console.WriteLine($"Карточка {card.Title} создана и прикреплена к доске");
-			Logger.WriteActionAsync($"Создана карточка {card.Title}. Время: \n");
+			logger.WriteActionAsync($"Создана карточка {card.Title}. Время: \n");
 			return card;
 		}
 		public void ChangeStatus(Card card, StatusOfCard status)

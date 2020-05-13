@@ -10,7 +10,7 @@ namespace Trello
 	{
 
 		public List<Desk> desks = new List<Desk>();
-public void AddNewDesk(Desk desk)
+		public void AddNewDesk(Desk desk)
 		{
 			desks.Add(desk);
 			File.WriteAllText("DeskManager.json", JsonConvert.SerializeObject(desks));

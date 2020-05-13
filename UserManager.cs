@@ -11,13 +11,14 @@ namespace Trello
 	public class UserManager
 	{
 		public List<User> users = new List<User>();
+		private Logger logger = new Logger();
 
 		public User CreateNewUser(string name)
 		{
 			var user = new User(name);
 			users.Add(user);
 			File.WriteAllText("UserManager.json", JsonConvert.SerializeObject(users));
-			Logger.WriteActionAsync($"Создан пользователь {user.Name}. Время: \n");
+			logger.WriteActionAsync($"Создан пользователь {user.Name}. Время: \n");
 			return user;
 		}
 		public void DeleteUser(User user)
