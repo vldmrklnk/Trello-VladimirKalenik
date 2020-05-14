@@ -18,6 +18,7 @@ namespace Trello
 				DeskManager deskManager = new DeskManager();
 				UserManager userManager = new UserManager();
 				CardManager cardManager = new CardManager();
+				Logger logger = new Logger();
 				if (File.Exists("DeskManager.json"))
 				{
 					deskManager.desks = JsonConvert.DeserializeObject<List<Desk>>(File.ReadAllText("DeskManager.json"));
@@ -55,6 +56,7 @@ namespace Trello
 								DateTime deadLine = Convert.ToDateTime(Console.ReadLine());
 								Desk desk = new Desk(ttl, deadLine);
 								deskManager.AddNewDesk(desk);
+								logger.WriteActionAsync($"Создана доска {desk.Name}. Время: \n");
 								break;
 							}
 						case 2:
@@ -85,6 +87,7 @@ namespace Trello
 									Card card = cardManager.ChooseCard(Console.ReadLine(), cardManager);
 									Console.WriteLine("Измените текст");
 									card.Data = Console.ReadLine();
+									logger.WriteActionAsync($"Информация в карточке {card.Title} изменена. Время: \n");
 
 								}
 								catch
@@ -106,6 +109,7 @@ namespace Trello
 														"2-OnStudent\n" +
 														"3-Done\n");
 									cardManager.ChangeStatus(card, (StatusOfCard)Convert.ToInt32(Console.ReadLine()));
+									logger.WriteActionAsync($"Изменен статус карточки {card.Title}. Время: \n");
 								}
 								catch
 								{
@@ -122,6 +126,7 @@ namespace Trello
 									Console.WriteLine("Введите имя нового исполнителя: ");
 									User user = userManager.FindOrCreateUser(Console.ReadLine(), userManager);
 									card.ChangeExecuter(user);
+									logger.WriteActionAsync($"У карточки {card.Title} поменялся исполнитель на {user.Name}. Время: \n");
 								}
 								catch
 								{
@@ -141,6 +146,7 @@ namespace Trello
 											$"     {c.ContainerDesk.Name}     |");
 
 								}
+								logger.WriteActionAsync($"Пользователь запросил карточки исполнителя {user.Name}. Время: \n");
 								break;
 							}
 						case 7:
@@ -158,6 +164,7 @@ namespace Trello
 											$"     {c.ContainerDesk.Name}     |");
 
 								}
+								logger.WriteActionAsync($"Пользователь запросил карточки по статусу {st}. Время: \n");
 								break;
 							}
 						case 8:
@@ -169,6 +176,7 @@ namespace Trello
 								{
 									deskManager.ShowAllCardsOfTheDesk(d, cardManager);
 								}
+								logger.WriteActionAsync($"Пользователем был запущен отчет. Время: \n");
 
 								break;
 
